@@ -1,0 +1,7 @@
+*.env
+**/*.pyc
+*.idea/
+venv/
+Pipfile
+*/__pycache__/
+tests/
