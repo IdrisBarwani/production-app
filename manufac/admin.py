@@ -1,5 +1,6 @@
+import re
 from django.contrib import admin
-from django.utils.html import mark_safe
+from django.utils.html import mark_safe,format_html
 
 
 # Register your models here.
@@ -16,15 +17,21 @@ class WorkOrderAdmin(admin.ModelAdmin):
     #     ('Date information', {'fields': ['pub_date'], 'classes': ['collapse']}),
     # ]
     # inlines = [ChoiceInline]
-    list_display = ('WorkOrder_id','product_sku_id', 'product_image', 'status','priority','required_quantity','avg_consumption_view')
+    list_display = ('WorkOrder_id','product_sku_id', 'product_image', 'status','priority','required_quantity','avg_consumption_view','max_quantity_possible')
+    fields = ('product_sku_id', 'status','priority','required_quantity','bom_component_sku') #temp to reduce effort of uploading images and adding time
     inlines = [
         BomComponentSkuInline,
     ]
     def avg_consumption_view(self, obj):
-        # return obj.avg_consumption
-        return obj
-        avg_consumption_view.short_description = "AVG Order ID"
-        avg_consumption_view.empty_value_display = '???'
+        return obj.bom_component_sku
+    avg_consumption_view.short_description = "Fabric Required"
+    avg_consumption_view.empty_value_display = '???'
+
+    def max_quantity_possible(self, obj):
+        max_quantity =  int(obj.required_quantity) * float(re.findall('\d*\.?\d+',str(obj.bom_component_sku))[1]);
+        return max_quantity
+    avg_consumption_view.short_description = "Max Quantity Possible"
+    avg_consumption_view.empty_value_display = '???'
 
     list_filter = ['status','priority']
     # search_fields = ['product_sku_id']
@@ -68,6 +75,10 @@ admin.site.register(WorkOrder, WorkOrderAdmin)
 
 # admin.site.register(WorkOrder)
 admin.site.register(Bom)
-admin.site.register(BomComponentSku)
+
+class BomComponentSkuAdmin(admin.ModelAdmin):
+    list_display = ('bom_id','avg_consumption','work_order_id','fabric_sku_id')
+
+admin.site.register(BomComponentSku, BomComponentSkuAdmin)
 admin.site.register(ComponentSku)
 admin.site.register(InventoryTransaction)
