@@ -18,20 +18,20 @@ class WorkOrderAdmin(admin.ModelAdmin):
     # ]
     # inlines = [ChoiceInline]
     list_display = ('WorkOrder_id','product_sku_id', 'product_image', 'status','priority','required_quantity','avg_consumption_view','max_quantity_possible')
-    fields = ('product_sku_id', 'status','priority','required_quantity','bom_component_sku') #temp to reduce effort of uploading images and adding time
     inlines = [
         BomComponentSkuInline,
     ]
     def avg_consumption_view(self, obj):
-        return obj.bom_component_sku
-    avg_consumption_view.short_description = "Fabric Required"
+        return obj.fabric_required()
+    avg_consumption_view.short_description = "Fabric Consumption"
     avg_consumption_view.empty_value_display = '???'
 
     def max_quantity_possible(self, obj):
         max_quantity =  int(obj.required_quantity) * float(re.findall('\d*\.?\d+',str(obj.bom_component_sku))[1]);
-        return max_quantity
-    avg_consumption_view.short_description = "Max Quantity Possible"
-    avg_consumption_view.empty_value_display = '???'
+        # return max_quantity
+        return obj.get_required_quant()
+    max_quantity_possible.short_description = "Fabric Required"
+    max_quantity_possible.empty_value_display = '???'
 
     list_filter = ['status','priority']
     # search_fields = ['product_sku_id']
@@ -80,5 +80,9 @@ class BomComponentSkuAdmin(admin.ModelAdmin):
     list_display = ('bom_id','avg_consumption','work_order_id','fabric_sku_id')
 
 admin.site.register(BomComponentSku, BomComponentSkuAdmin)
-admin.site.register(ComponentSku)
+
+class ComponentSkuAdmin(admin.ModelAdmin):
+    list_display = ('id','name')
+
+admin.site.register(ComponentSku, ComponentSkuAdmin)
 admin.site.register(InventoryTransaction)
