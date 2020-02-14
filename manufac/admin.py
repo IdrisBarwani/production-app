@@ -5,31 +5,34 @@ from django.utils.html import mark_safe,format_html
 
 # Register your models here.
 
-from .models import WorkOrder, Bom, BomComponentSku, ComponentSku, InventoryTransaction
+from .models import WorkOrder, Pack, TechPackSku, ComponentSku, InventoryTransaction, Size
 
-class BomComponentSkuInline(admin.StackedInline):
-    model = BomComponentSku
+class TechPackSkuInline(admin.StackedInline):
+    model = TechPackSku
     extra = 1
 
+class SizeInline(admin.StackedInline):
+    model = Size
+    # readonly_fields = ('XXL','total')
+    max_num = 1
+
 class WorkOrderAdmin(admin.ModelAdmin):
-    # fieldsets = [
-    #     (None,               {'fields': ['question_text']}),
-    #     ('Date information', {'fields': ['pub_date'], 'classes': ['collapse']}),
-    # ]
-    # inlines = [ChoiceInline]
     list_display = ('WorkOrder_id','product_sku_id', 'product_image', 'status','priority','required_quantity','avg_consumption_view','max_quantity_possible')
     inlines = [
-        BomComponentSkuInline,
+        TechPackSkuInline, SizeInline
     ]
+
+    def required_quantity(self, obj):
+        return obj.required_quantity()
+
     def avg_consumption_view(self, obj):
         return obj.fabric_required()
     avg_consumption_view.short_description = "Fabric Consumption"
     avg_consumption_view.empty_value_display = '???'
 
     def max_quantity_possible(self, obj):
-        max_quantity =  int(obj.required_quantity) * float(re.findall('\d*\.?\d+',str(obj.bom_component_sku))[1]);
-        # return max_quantity
-        return obj.get_required_quant()
+        # max_quantity =  int(obj.required_quantity) * float(re.findall('\d*\.?\d+',str(obj.pack_component_sku))[1]);
+        return obj.max_quantity_possible()
     max_quantity_possible.short_description = "Fabric Required"
     max_quantity_possible.empty_value_display = '???'
 
@@ -73,16 +76,28 @@ class WorkOrderAdmin(admin.ModelAdmin):
 admin.site.register(WorkOrder, WorkOrderAdmin)
 
 
-# admin.site.register(WorkOrder)
-admin.site.register(Bom)
+class PackAdmin(admin.ModelAdmin):
+    list_display = ('name','product_sku_id')
+admin.site.register(Pack, PackAdmin)
 
-class BomComponentSkuAdmin(admin.ModelAdmin):
-    list_display = ('bom_id','avg_consumption','work_order_id','fabric_sku_id')
+class TechPackSkuAdmin(admin.ModelAdmin):
+    list_display = ('pack_id','avg_consumption','work_order_id','fabric_sku_id')
 
-admin.site.register(BomComponentSku, BomComponentSkuAdmin)
+admin.site.register(TechPackSku, TechPackSkuAdmin)
 
 class ComponentSkuAdmin(admin.ModelAdmin):
     list_display = ('id','name')
 
 admin.site.register(ComponentSku, ComponentSkuAdmin)
 admin.site.register(InventoryTransaction)
+
+class SizeAdmin(admin.ModelAdmin):
+    list_display = [field.name for field in Size._meta.get_fields()]
+    
+    # readonly_fields = ('XXS','total_m')
+    # fields = ('XXS','XS','S','M','L','XL','XXL','total_m')
+    # list_display = ('XXS','XS','S','M','L','XL','XXL','total_m')
+    # def total_m(self, obj):
+    #     tol = int(obj.S) + int(obj.M);
+    #     return tol
+admin.site.register(Size, SizeAdmin)
