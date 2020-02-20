@@ -24,7 +24,7 @@ class WorkOrderAdmin(admin.ModelAdmin):
     # # all_fields = User._meta.get_fields()
     # print('-------stop----------')
     
-    list_display = list_display = ['WorkOrder_id','product_sku_id', 'product_image', 'status','priority','required_quantity','avg_fabric_consumption','fabric_required','action_button']
+    list_display = list_display = ['WorkOrder_id','product_sku_id', 'product_image', 'status','priority','process','required_quantity','avg_fabric_consumption','fabric_required','action_button']
 
     def get_list_display(self, request):
         current_user_username = request.user.get_username()
