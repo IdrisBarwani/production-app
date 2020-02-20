@@ -10,6 +10,7 @@ STATUS_CHOICES = [
     ('r', 'Confirmed'),
     ('s', 'Started'),
     ('h', 'Halted'),
+    ('x', 'Cancelled'),
     ('c', 'Completed'),
 ]
 
@@ -44,7 +45,7 @@ class WorkOrder(models.Model):
             retrieval = e.total
         return retrieval
 
-    def max_quantity_possible(self):
+    def fabric_required(self):
         pack_lines = TechPackSku.objects.filter(work_order_id = self.id)
         retrieval = ""
         iteration = ""
@@ -60,7 +61,7 @@ class WorkOrder(models.Model):
             iteration = iteration + str(retrieval) + 'kg' + ' | '
         return iteration
 
-    def fabric_required(self):
+    def avg_fabric_consumption(self):
         pack_lines = TechPackSku.objects.filter(work_order_id = self.id)
         retrieval = ""
         for e in pack_lines:
@@ -125,3 +126,15 @@ class Size(models.Model):
         tolal = int(self.XXS) + int(self.XS) + int(self.S) + int(self.M) + int(self.L) + int(self.XL) + int(self.XXL)
         return tolal
     
+# class Sort(models.Model):
+#     work_order_fk = models.ForeignKey('WorkOrder', on_delete=models.CASCADE)
+#     rejected = models.PositiveIntegerField(default=0)
+#     missing = models.PositiveIntegerField(default=0)
+
+#     def required_status(self):
+#         retrieval = self.work_order_fk
+#         print(retrieval)
+#         # required_status = WorkOrder.objects.filter(id = self.work_order_fk)
+#         # for e in required_status:
+#         #     retrieval = e.status
+#         # return required_status

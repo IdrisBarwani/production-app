@@ -1,6 +1,7 @@
 import re
 from django.contrib import admin
 from django.utils.html import mark_safe,format_html
+from django.contrib.auth.models import User, Group
 
 
 # Register your models here.
@@ -17,29 +18,56 @@ class SizeInline(admin.StackedInline):
     max_num = 1
 
 class WorkOrderAdmin(admin.ModelAdmin):
-    list_display = ('WorkOrder_id','product_sku_id', 'product_image', 'status','priority','required_quantity','avg_consumption_view','max_quantity_possible')
+    # print('-------start----------')
+    # # for e in User.objects.all():        ----------- Use this code to fetch all users
+    # #     print(e)
+    # # all_fields = User._meta.get_fields()
+    # print('-------stop----------')
+    
+    list_display = list_display = ['WorkOrder_id','product_sku_id', 'product_image', 'status','priority','required_quantity','avg_fabric_consumption','fabric_required','action_button']
+
+    def get_list_display(self, request):
+        current_user_username = request.user.get_username()
+
+        users_in_cutting_group = Group.objects.get(name="cutting").user_set.all()
+        for fetch in users_in_cutting_group:
+            cutting_users_username = str(fetch)
+            print(cutting_users_username)
+            if cutting_users_username == current_user_username:
+                print('hurray!')
+                if 'action_button' in self.list_display:
+                    self.list_display.remove('action_button')
+                else:
+                    self.list_display.append('action_button')
+                    print('nope buddy :(')
+
+        return self.list_display
+
     inlines = [
         TechPackSkuInline, SizeInline
     ]
 
-    def required_quantity(self, obj):
-        return obj.required_quantity()
-
-    def avg_consumption_view(self, obj):
-        return obj.fabric_required()
-    avg_consumption_view.short_description = "Fabric Consumption"
-    avg_consumption_view.empty_value_display = '???'
-
-    def max_quantity_possible(self, obj):
+    def fabric_required(self, obj): #---------------------This block of code can be removed later
         # max_quantity =  int(obj.required_quantity) * float(re.findall('\d*\.?\d+',str(obj.pack_component_sku))[1]);
-        return obj.max_quantity_possible()
-    max_quantity_possible.short_description = "Fabric Required"
-    max_quantity_possible.empty_value_display = '???'
+        return obj.fabric_required()
+    fabric_required.short_description = "Fabric Required"
+    fabric_required.empty_value_display = '???'
 
     list_filter = ['status','priority']
+    list_editable = ('priority',)
     # search_fields = ['product_sku_id']
     # list_per_page = 1
     actions = ['make_confirm','make_start']
+
+    def action_button(self, obj):
+        # Use this to check for self and then update the status
+        # WorkOrder.objects.update(status='c')
+        # print(WorkOrder.objects.filter(id=obj.pk))
+        white = format_html('<button id="%(id)s '
+                'data-value="%(value)s>Completed</button>' % {'id': obj.pk, 'value': obj.status})
+        black = format_html('<a href="14/change/">NotALink</a>')
+        return white
+    action_button.short_description = "Actions"
 
     def WorkOrder_id(self, obj):
         return obj.id
