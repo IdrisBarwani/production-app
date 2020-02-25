@@ -17,6 +17,7 @@ from django.contrib import admin
 from django.conf.urls import url
 from django.urls import include, path
 from django.conf import settings
+from manufac.views import start
 # from django.conf.urls.static import static
 
 admin.site.site_header = 'Production App admin'
@@ -26,5 +27,6 @@ urlpatterns = [
     url(r'^jet/dashboard/', include('jet.dashboard.urls', 'jet-dashboard')),
     path('manufac/', include('manufac.urls')),
     path('admin/', admin.site.urls),
+    path('<int:pk>/start/', start, name='start'),
 ] 
 # + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

@@ -11,6 +11,8 @@ from .models import WorkOrder, Pack, TechPackSku, ComponentSku, InventoryTransac
 class TechPackSkuInline(admin.StackedInline):
     model = TechPackSku
     extra = 1
+    verbose_name = 'Fabric'
+    verbose_name_plural = 'Fabric'
 
 class SizeInline(admin.StackedInline):
     model = Size
@@ -24,7 +26,7 @@ class WorkOrderAdmin(admin.ModelAdmin):
     # # all_fields = User._meta.get_fields()
     # print('-------stop----------')
     
-    list_display = list_display = ['WorkOrder_id','product_sku_id', 'product_image', 'status','priority','process','required_quantity','avg_fabric_consumption','fabric_required','action_button']
+    list_display = ['WorkOrder_id','product_sku_id', 'product_image', 'status','priority','process','required_quantity','avg_fabric_consumption','fabric_required','action_button']
 
     def get_list_display(self, request):
         current_user_username = request.user.get_username()
@@ -63,11 +65,10 @@ class WorkOrderAdmin(admin.ModelAdmin):
         # Use this to check for self and then update the status
         # WorkOrder.objects.update(status='c')
         # print(WorkOrder.objects.filter(id=obj.pk))
-        white = format_html('<button id="%(id)s '
-                'data-value="%(value)s>Completed</button>' % {'id': obj.pk, 'value': obj.status})
-        black = format_html('<a href="14/change/">NotALink</a>')
-        return white
-    action_button.short_description = "Actions"
+        # white = format_html('<button id="%(id)s" data-value="%(value)s">Completed</button>' % {'id': obj.pk, 'value': obj.status})
+        black = format_html('<a class="button" href="/%(id)s/start">Mark Started</a>'% {'id': obj.pk})
+        return black
+    action_button.short_description = "Change status"
 
     def WorkOrder_id(self, obj):
         return obj.id
