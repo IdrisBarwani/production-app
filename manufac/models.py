@@ -42,7 +42,7 @@ class WorkOrder(models.Model):
     #updated_at = odels.DateTimeField()
     #updated_by = models.CharField(max_length=20)
     status = models.CharField(max_length=20, default='d', choices=STATUS_CHOICES) #ENUM. DRAFT, CONFIRMED, STARTED, HALTED, COMPLETED.
-    priority = models.IntegerField(choices=PRIORITY_CHOICES) #ENUM. 1, 2, 3.
+    priority = models.IntegerField(choices=PRIORITY_CHOICES, default=3,) #ENUM. 1, 2, 3.
     process = models.IntegerField(default=1, choices=PROCESS_CHOICES) #Current process of the work_order
     # required_quantity = models.IntegerField() #user input.
     #available_quantity = models.IntegerField() #derived quantity. upon pack explosion

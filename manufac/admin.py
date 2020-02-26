@@ -38,12 +38,23 @@ class WorkOrderAdmin(admin.ModelAdmin):
             if cutting_users_username == current_user_username:
                 print('hurray!')
                 if 'action_button' in self.list_display:
-                    self.list_display.remove('action_button')
+                    self.list_display.remove('action_button')      
                 else:
                     self.list_display.append('action_button')
                     print('nope buddy :(')
-
         return self.list_display
+
+    def get_queryset(self, request):
+        current_user_username = request.user.get_username()
+        users_in_cutting_group = Group.objects.get(name="cutting").user_set.all()
+        for fetch in users_in_cutting_group:
+            cutting_users_username = str(fetch)
+            blue = super(WorkOrderAdmin, self).get_queryset(request)
+            if cutting_users_username == current_user_username:
+                blue = super(WorkOrderAdmin, self).get_queryset(request)
+                blue = blue.filter(process=3)
+            return blue
+        
 
     inlines = [
         TechPackSkuInline, SizeInline
@@ -55,7 +66,7 @@ class WorkOrderAdmin(admin.ModelAdmin):
     fabric_required.short_description = "Fabric Required"
     fabric_required.empty_value_display = '???'
 
-    list_filter = ['status','priority']
+    list_filter = ['status','priority','process']
     list_editable = ('priority',)
     # search_fields = ['product_sku_id']
     # list_per_page = 1
