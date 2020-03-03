@@ -34,6 +34,32 @@ PROCESS_CHOICES = [
     (9, 'Completed'),
 ]
 
+OPERATION_CHOICES = [
+    ('i', 'IN'),
+    ('o', 'OUT'),
+    ('m', 'Missing'),
+    ('r', 'Rejected'),
+]
+
+class Routing(models.Model):
+    name = models.CharField(max_length=20)
+    is_active = models.BooleanField()
+    members = models.ManyToManyField('RoutingGroup', through='RouteAssociation')
+
+    def __str__(self):
+        return self.name
+
+class RoutingGroup(models.Model):
+    name = models.CharField(max_length=20)
+
+    def __str__(self):
+        return self.name
+
+class RouteAssociation(models.Model):
+    Routing = models.ForeignKey('Routing', on_delete=models.CASCADE)
+    RoutingGroup = models.ForeignKey('RoutingGroup', on_delete=models.CASCADE)
+    position = models.PositiveIntegerField()
+
 class WorkOrder(models.Model):
     product_sku_id = models.IntegerField() #tssdb sku id
     product_sku_img = models.ImageField(upload_to='manufac/', null=True, blank=True)
@@ -42,7 +68,7 @@ class WorkOrder(models.Model):
     #updated_at = odels.DateTimeField()
     #updated_by = models.CharField(max_length=20)
     status = models.CharField(max_length=20, default='d', choices=STATUS_CHOICES) #ENUM. DRAFT, CONFIRMED, STARTED, HALTED, COMPLETED.
-    priority = models.IntegerField(choices=PRIORITY_CHOICES, default=3,) #ENUM. 1, 2, 3.
+    priority = models.IntegerField(choices=PRIORITY_CHOICES, default=3) #ENUM. 1, 2, 3.
     process = models.IntegerField(default=1, choices=PROCESS_CHOICES) #Current process of the work_order
     # required_quantity = models.IntegerField() #user input.
     #available_quantity = models.IntegerField() #derived quantity. upon pack explosion
@@ -50,6 +76,15 @@ class WorkOrder(models.Model):
     start_time = models.DateTimeField(null=True, blank=True) #not shown to user . set using status.
     end_time = models.DateTimeField(null=True, blank=True) #not shown to user. set using status.
     # pack_component_sku = models.ForeignKey('TechPackSku', on_delete=models.CASCADE, null=True) # ---------Created to fetch values from TechPackSku Model
+    # size_fk = models.ForeignKey('Size', on_delete=models.CASCADE, null=True, blank=True)
+    sort_fk = models.ForeignKey('Sort', on_delete=models.CASCADE)
+
+    def missing(self):
+        retrieval = ""
+        required_quantity = Sort.objects.filter(work_order_fk = self.id)
+        for e in required_quantity:
+            retrieval = e.missing
+        return retrieval
 
     def required_quantity(self):
         retrieval = ""
@@ -85,7 +120,16 @@ class WorkOrder(models.Model):
                         + ' -> ' 
                         + str(e.avg_consumption) + ' | ')
         return retrieval
- 
+
+class WorkOrderLog(models.Model):
+    work_order_fk = models.ForeignKey('WorkOrder', on_delete=models.CASCADE)
+    routing_id = models.ForeignKey('RouteAssociation', on_delete=models.CASCADE)
+    process = models.CharField(max_length=120, choices=OPERATION_CHOICES)
+    quantity = models.PositiveIntegerField()
+
+    def status(self):
+        return self.quantity
+
 class Pack(models.Model):
 	#id field.
     #work_order = models.ForeignKey('WorkOrder', on_delete=models.CASCADE) #NOT REQUIRED.
@@ -139,15 +183,21 @@ class Size(models.Model):
         tolal = int(self.XXS) + int(self.XS) + int(self.S) + int(self.M) + int(self.L) + int(self.XL) + int(self.XXL)
         return tolal
     
-# class Sort(models.Model):
-#     work_order_fk = models.ForeignKey('WorkOrder', on_delete=models.CASCADE)
-#     rejected = models.PositiveIntegerField(default=0)
-#     missing = models.PositiveIntegerField(default=0)
+class Sort(models.Model):
+    work_order_fk = models.ForeignKey('WorkOrder', on_delete=models.CASCADE)
+    rejected = models.PositiveIntegerField(default=0)
+    missing = models.PositiveIntegerField(default=0)
+    # Sizes
+    XXS = models.PositiveIntegerField(default=0)
+    XS = models.PositiveIntegerField(default=0)
+    S = models.PositiveIntegerField(default=0)
+    M = models.PositiveIntegerField(default=0)
+    L = models.PositiveIntegerField(default=0)
+    XL = models.PositiveIntegerField(default=0)
+    XXL = models.PositiveIntegerField(default=0)
+    # To find total
+    @property
+    def total(self):
+        tolal = int(self.XXS) + int(self.XS) + int(self.S) + int(self.M) + int(self.L) + int(self.XL) + int(self.XXL)
+        return tolal
 
-#     def required_status(self):
-#         retrieval = self.work_order_fk
-#         print(retrieval)
-#         # required_status = WorkOrder.objects.filter(id = self.work_order_fk)
-#         # for e in required_status:
-#         #     retrieval = e.status
-#         # return required_status

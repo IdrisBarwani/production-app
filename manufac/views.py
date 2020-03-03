@@ -9,7 +9,8 @@ def index(request):
     return HttpResponse("Hello, You're at the Manufacturing App's index.")
 
 def start(request, pk):
-    WorkOrder.objects.filter(pk = pk).update(status='s')
+    if request.user.has_perm('WorkOrder.change_WorkOrder'):
+        WorkOrder.objects.filter(pk = pk).update(status='s')
     response = "Work order %s successfully."
     # return HttpResponse(response % pk)
     return HttpResponseRedirect('/admin/manufac/workorder/')

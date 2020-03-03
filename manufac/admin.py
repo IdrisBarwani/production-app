@@ -6,7 +6,7 @@ from django.contrib.auth.models import User, Group
 
 # Register your models here.
 
-from .models import WorkOrder, Pack, TechPackSku, ComponentSku, InventoryTransaction, Size
+from .models import WorkOrder, Pack, TechPackSku, ComponentSku, InventoryTransaction, Size, Sort, WorkOrderLog, Routing, RouteAssociation, RoutingGroup
 
 class TechPackSkuInline(admin.StackedInline):
     model = TechPackSku
@@ -28,10 +28,13 @@ class WorkOrderAdmin(admin.ModelAdmin):
     
     list_display = ['WorkOrder_id','product_sku_id', 'product_image', 'status','priority','process','required_quantity','avg_fabric_consumption','fabric_required','action_button']
 
+    fields = ('product_sku_id','status','priority')
+
     def get_list_display(self, request):
         current_user_username = request.user.get_username()
-
         users_in_cutting_group = Group.objects.get(name="cutting").user_set.all()
+        users_in_sorting_group = Group.objects.get(name="sorting").user_set.all()
+
         for fetch in users_in_cutting_group:
             cutting_users_username = str(fetch)
             print(cutting_users_username)
@@ -42,6 +45,24 @@ class WorkOrderAdmin(admin.ModelAdmin):
                 else:
                     self.list_display.append('action_button')
                     print('nope buddy :(')
+
+        for fetch in users_in_sorting_group:
+            sorting_users_username = str(fetch)
+            print(sorting_users_username)
+            if sorting_users_username == current_user_username:
+                print('hurray!')
+                if 'action_button' in self.list_display:
+                    self.list_display.remove('action_button')
+                if 'avg_fabric_consumption' in self.list_display:
+                    self.list_display.remove('avg_fabric_consumption')
+                if 'fabric_required' in self.list_display:
+                    self.list_display.remove('fabric_required')
+                else:
+                    self.list_display.append('avg_fabric_consumption')
+                    self.list_display.append('fabric_required')
+                    self.list_display.append('action_button')
+                    print('nope buddy :(')
+
         return self.list_display
 
     def get_queryset(self, request):
@@ -49,11 +70,11 @@ class WorkOrderAdmin(admin.ModelAdmin):
         users_in_cutting_group = Group.objects.get(name="cutting").user_set.all()
         for fetch in users_in_cutting_group:
             cutting_users_username = str(fetch)
-            blue = super(WorkOrderAdmin, self).get_queryset(request)
+            queryset = super(WorkOrderAdmin, self).get_queryset(request)
             if cutting_users_username == current_user_username:
-                blue = super(WorkOrderAdmin, self).get_queryset(request)
-                blue = blue.filter(process=3)
-            return blue
+                queryset = super(WorkOrderAdmin, self).get_queryset(request)
+                queryset = queryset.filter(process=3)
+            return queryset
         
 
     inlines = [
@@ -141,3 +162,28 @@ class SizeAdmin(admin.ModelAdmin):
     #     tol = int(obj.S) + int(obj.M);
     #     return tol
 admin.site.register(Size, SizeAdmin)
+
+class SortAdmin(admin.ModelAdmin):
+    list_display = ('rejected','missing','XXS','XS','S','M','L','XL','XXL','total')
+
+admin.site.register(Sort, SortAdmin)
+
+class LogAdmin(admin.ModelAdmin):
+    list_display = [field.name for field in WorkOrderLog._meta.get_fields()]
+
+admin.site.register(WorkOrderLog, LogAdmin)
+
+class RoutingAdmin(admin.ModelAdmin):
+    list_display = ['name','is_active']
+
+admin.site.register(Routing, RoutingAdmin)
+
+class RoutingGroupAdmin(admin.ModelAdmin):
+    list_display = ['name',]
+
+admin.site.register(RoutingGroup, RoutingGroupAdmin)
+
+class RouteAssociationAdmin(admin.ModelAdmin):
+    list_display = ['Routing','RoutingGroup','position']
+
+admin.site.register(RouteAssociation, RouteAssociationAdmin)
