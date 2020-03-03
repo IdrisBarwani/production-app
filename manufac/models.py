@@ -2,6 +2,7 @@ import datetime
 
 from django.db import models
 from django.utils import timezone
+from django.contrib.auth.models import Group
 
 # Create your models here.
 
@@ -44,13 +45,14 @@ OPERATION_CHOICES = [
 class Routing(models.Model):
     name = models.CharField(max_length=20)
     is_active = models.BooleanField()
-    members = models.ManyToManyField('RoutingGroup', through='RouteAssociation')
+    group = models.ForeignKey(Group, on_delete=models.CASCADE)
 
     def __str__(self):
         return self.name
 
 class RoutingGroup(models.Model):
     name = models.CharField(max_length=20)
+    members = models.ManyToManyField('Routing', through='RouteAssociation')
 
     def __str__(self):
         return self.name
