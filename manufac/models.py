@@ -52,15 +52,44 @@ class Routing(models.Model):
 
 class RoutingGroup(models.Model):
     name = models.CharField(max_length=20)
-    members = models.ManyToManyField('Routing', through='RouteAssociation')
+    Routing = models.ManyToManyField('Routing', through='RouteAssociation')
 
     def __str__(self):
         return self.name
 
+def increment():
+
+    print('_____________________________________________')
+
+    red = RoutingGroup.objects.all()
+    # hello = RoutingGroup.objects.latest('name')
+    green = RouteAssociation.objects.all()
+    for fetch in red:
+        tino = fetch.name
+
+        count = 0
+        for fetch in green:
+            purple = fetch.RoutingGroup
+            maroon = str(purple)
+
+            if (maroon == tino):
+                count = count+1
+
+    black = count+1
+
+
+    print('_____________________________________________')
+
+
+    return black
+
 class RouteAssociation(models.Model):
     Routing = models.ForeignKey('Routing', on_delete=models.CASCADE)
     RoutingGroup = models.ForeignKey('RoutingGroup', on_delete=models.CASCADE)
-    position = models.PositiveIntegerField()
+    position = models.PositiveIntegerField(default=increment)
+    
+    def __str__(self):
+        return (str(self.Routing) + ' -> ' + str(self.RoutingGroup))
 
 class WorkOrder(models.Model):
     product_sku_id = models.IntegerField() #tssdb sku id
@@ -79,7 +108,7 @@ class WorkOrder(models.Model):
     end_time = models.DateTimeField(null=True, blank=True) #not shown to user. set using status.
     # pack_component_sku = models.ForeignKey('TechPackSku', on_delete=models.CASCADE, null=True) # ---------Created to fetch values from TechPackSku Model
     # size_fk = models.ForeignKey('Size', on_delete=models.CASCADE, null=True, blank=True)
-    sort_fk = models.ForeignKey('Sort', on_delete=models.CASCADE)
+    sort_fk = models.ForeignKey('Sort', on_delete=models.CASCADE, null=True, blank=True)
 
     def missing(self):
         retrieval = ""
@@ -137,6 +166,8 @@ class Pack(models.Model):
     #work_order = models.ForeignKey('WorkOrder', on_delete=models.CASCADE) #NOT REQUIRED.
     name = models.CharField(max_length=20)
     product_sku_id = models.IntegerField() #tssdb sku id
+    route = models.ForeignKey('RoutingGroup', on_delete=models.CASCADE)   #which group of routes to be followed by product process
+
     def __str__(self):
         id_name = str(self.name) + ' - ' + str(self.product_sku_id)
         return id_name

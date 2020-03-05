@@ -30,51 +30,51 @@ class WorkOrderAdmin(admin.ModelAdmin):
 
     fields = ('product_sku_id','status','priority')
 
-    def get_list_display(self, request):
-        current_user_username = request.user.get_username()
-        users_in_cutting_group = Group.objects.get(name="cutting").user_set.all()
-        users_in_sorting_group = Group.objects.get(name="sorting").user_set.all()
+    # def get_list_display(self, request):
+    #     current_user_username = request.user.get_username()
+    #     users_in_cutting_group = Group.objects.get(name="cutting").user_set.all()
+    #     users_in_sorting_group = Group.objects.get(name="sorting").user_set.all()
 
-        for fetch in users_in_cutting_group:
-            cutting_users_username = str(fetch)
-            print(cutting_users_username)
-            if cutting_users_username == current_user_username:
-                print('hurray!')
-                if 'action_button' in self.list_display:
-                    self.list_display.remove('action_button')      
-                else:
-                    self.list_display.append('action_button')
-                    print('nope buddy :(')
+    #     for fetch in users_in_cutting_group:
+    #         cutting_users_username = str(fetch)
+    #         print(cutting_users_username)
+    #         if cutting_users_username == current_user_username:
+    #             print('hurray!')
+    #             if 'action_button' in self.list_display:
+    #                 self.list_display.remove('action_button')      
+    #             else:
+    #                 self.list_display.append('action_button')
+    #                 print('nope buddy :(')
 
-        for fetch in users_in_sorting_group:
-            sorting_users_username = str(fetch)
-            print(sorting_users_username)
-            if sorting_users_username == current_user_username:
-                print('hurray!')
-                if 'action_button' in self.list_display:
-                    self.list_display.remove('action_button')
-                if 'avg_fabric_consumption' in self.list_display:
-                    self.list_display.remove('avg_fabric_consumption')
-                if 'fabric_required' in self.list_display:
-                    self.list_display.remove('fabric_required')
-                else:
-                    self.list_display.append('avg_fabric_consumption')
-                    self.list_display.append('fabric_required')
-                    self.list_display.append('action_button')
-                    print('nope buddy :(')
+    #     for fetch in users_in_sorting_group:
+    #         sorting_users_username = str(fetch)
+    #         print(sorting_users_username)
+    #         if sorting_users_username == current_user_username:
+    #             print('hurray!')
+    #             if 'action_button' in self.list_display:
+    #                 self.list_display.remove('action_button')
+    #             if 'avg_fabric_consumption' in self.list_display:
+    #                 self.list_display.remove('avg_fabric_consumption')
+    #             if 'fabric_required' in self.list_display:
+    #                 self.list_display.remove('fabric_required')
+    #             else:
+    #                 self.list_display.append('avg_fabric_consumption')
+    #                 self.list_display.append('fabric_required')
+    #                 self.list_display.append('action_button')
+    #                 print('nope buddy :(')
 
-        return self.list_display
+    #     return self.list_display
 
-    def get_queryset(self, request):
-        current_user_username = request.user.get_username()
-        users_in_cutting_group = Group.objects.get(name="cutting").user_set.all()
-        for fetch in users_in_cutting_group:
-            cutting_users_username = str(fetch)
-            queryset = super(WorkOrderAdmin, self).get_queryset(request)
-            if cutting_users_username == current_user_username:
-                queryset = super(WorkOrderAdmin, self).get_queryset(request)
-                queryset = queryset.filter(process=3)
-            return queryset
+    # def get_queryset(self, request):
+    #     current_user_username = request.user.get_username()
+    #     users_in_cutting_group = Group.objects.get(name="cutting").user_set.all()
+    #     for fetch in users_in_cutting_group:
+    #         cutting_users_username = str(fetch)
+    #         queryset = super(WorkOrderAdmin, self).get_queryset(request)
+    #         if cutting_users_username == current_user_username:
+    #             queryset = super(WorkOrderAdmin, self).get_queryset(request)
+    #             queryset = queryset.filter(process=3)
+    #         return queryset
         
 
     inlines = [
@@ -138,7 +138,7 @@ admin.site.register(WorkOrder, WorkOrderAdmin)
 
 
 class PackAdmin(admin.ModelAdmin):
-    list_display = ('name','product_sku_id')
+    list_display = ('name','product_sku_id','route')
 admin.site.register(Pack, PackAdmin)
 
 class TechPackSkuAdmin(admin.ModelAdmin):
@@ -185,5 +185,6 @@ admin.site.register(RoutingGroup, RoutingGroupAdmin)
 
 class RouteAssociationAdmin(admin.ModelAdmin):
     list_display = ['Routing','RoutingGroup','position']
+    readonly_fields = ['position',]
 
 admin.site.register(RouteAssociation, RouteAssociationAdmin)
