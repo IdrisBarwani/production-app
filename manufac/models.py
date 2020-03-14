@@ -55,7 +55,7 @@ class RoutingGroup(models.Model):
     Routing = models.ManyToManyField('Routing', through='RouteAssociation')
 
     def __str__(self):
-        return self.name
+        return self.name  
 
 def increment():
 
@@ -152,14 +152,34 @@ class WorkOrder(models.Model):
                         + str(e.avg_consumption) + ' | ')
         return retrieval
 
+    def position_retrival(self):
+        techPackSku = TechPackSku.objects.filter(work_order_id = self.id)
+        for e in techPackSku:
+            pack_id = e.pack_id.id
+            pack = Pack.objects.filter(id = pack_id)
+            for m in pack:
+                route = m.route
+                route_assc = RouteAssociation.objects.filter(RoutingGroup = route)
+                for i in route_assc:
+                    position = i.position
+                    # print(position)
+        # techPackSku12 = TechPackSku.objects.filter(work_order_id = self.id)        
+
 class WorkOrderLog(models.Model):
     work_order_fk = models.ForeignKey('WorkOrder', on_delete=models.CASCADE)
     routing_id = models.ForeignKey('RouteAssociation', on_delete=models.CASCADE)
-    process = models.CharField(max_length=120, choices=OPERATION_CHOICES)
+    operation = models.CharField(max_length=120, choices=OPERATION_CHOICES)
     quantity = models.PositiveIntegerField()
 
     def status(self):
         return self.quantity
+
+    @classmethod
+    def create(cls, work_order_fk_id, routing_id_id, operation, quantity):
+        print(routing_id_id)
+        wol = cls(work_order_fk_id=work_order_fk_id, routing_id_id=routing_id_id, operation=operation, quantity=quantity)
+        wol.save()
+        return wol
 
 class Pack(models.Model):
 	#id field.

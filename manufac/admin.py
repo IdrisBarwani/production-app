@@ -98,7 +98,8 @@ class WorkOrderAdmin(admin.ModelAdmin):
         # WorkOrder.objects.update(status='c')
         # print(WorkOrder.objects.filter(id=obj.pk))
         # white = format_html('<button id="%(id)s" data-value="%(value)s">Completed</button>' % {'id': obj.pk, 'value': obj.status})
-        black = format_html('<a class="button" href="/%(id)s/start">Mark Started</a>'% {'id': obj.pk})
+        black = format_html('<a class="button" href="/%(id)s/start">Mark Started</a><a class="button" href="/%(id)s/get_wol">ADD</a>'% {'id': obj.pk})
+        # format_html('<a class="button" href="/%(id)s/start">Mark Started</a><a class="button" href="/%(id)s/%(process)s/addwol">ADD</a>'% {'id': obj.pk, 'process': obj.get_process_display()})
         return black
     action_button.short_description = "Change status"
 
@@ -138,7 +139,7 @@ admin.site.register(WorkOrder, WorkOrderAdmin)
 
 
 class PackAdmin(admin.ModelAdmin):
-    list_display = ('name','product_sku_id','route')
+    list_display = ('id','name','product_sku_id','route')
 admin.site.register(Pack, PackAdmin)
 
 class TechPackSkuAdmin(admin.ModelAdmin):
@@ -179,12 +180,12 @@ class RoutingAdmin(admin.ModelAdmin):
 admin.site.register(Routing, RoutingAdmin)
 
 class RoutingGroupAdmin(admin.ModelAdmin):
-    list_display = ['name',]
+    list_display = ['id','name',]
 
 admin.site.register(RoutingGroup, RoutingGroupAdmin)
 
 class RouteAssociationAdmin(admin.ModelAdmin):
-    list_display = ['Routing','RoutingGroup','position']
+    list_display = ['id','Routing','RoutingGroup','position']
     readonly_fields = ['position',]
 
 admin.site.register(RouteAssociation, RouteAssociationAdmin)
