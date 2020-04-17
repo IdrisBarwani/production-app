@@ -9,7 +9,8 @@ from django.shortcuts import render
 
 
 def index(request):
-    return HttpResponse("Hello, You're at the Manufacturing App's index.")
+    # return HttpResponse("Hello, You're at the Manufacturing App's index.")
+    return HttpResponseRedirect('/admin/manufac/workorder/')
 
 def start(request, pk):
     if request.user.has_perm('WorkOrder.change_WorkOrder'):
