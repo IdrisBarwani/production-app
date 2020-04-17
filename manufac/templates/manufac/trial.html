@@ -1,0 +1,45 @@
+<h1>Work Order Log intermediate view</h1>
+
+<!-- <h2>Work Order Log ID: {{ workorderlog.pk }}</h2>
+
+<h2>Work Order ID: {{ workorderlog.work_order_fk }}</h2>
+
+<h2>Routing ID: {{ workorderlog.routing_id }}</h2>
+
+<h2>Operation: {{ workorderlog.get_operation_display }}</h2>
+
+<h2>Quantity: {{ workorderlog.quantity }}</h2> -->
+<!-- <h2>{{ object_list }}</h2> -->
+<!-- <h2>{{ pack_list }}</h2> -->
+<!-- {% block body %}
+    <ul>
+        {% for WorkOrderLog in object_list %}
+            <li>{{ WorkOrderLog.quantity }}</li>
+        {% endfor %}
+    </ul>
+{% endblock %} -->
+
+<!-- <select name="operation" class="selectpicker">
+{% for x in workorderlog.fields.operation.choices %}
+<option value="{{ workorderlog.pk }}">{{ workorderlog.get_operation_display }}</option>
+{% endfor %}
+</select> -->
+
+{% block content %}
+<form action="/recieve_data/" method="post">{% csrf_token %}
+    <div class="fieldWrapper">
+        {{ form.name.errors }}
+        <label for="id_operation">Operation:</label>
+        {{ form.operation }} 
+        <label for="id_operation">Quantity:</label>
+        {{ form.quantity }} 
+        <label for="id_operation">Routing id:</label>
+        {{ form.routing_id }} 
+        <label for="id_operation">Work order id:</label>
+        {{ form.work_order_fk }}
+    </div>
+    <button type="submit">
+        <i class="fa fa-thumb-tack"></i> Post
+    </button>
+</form>
+{% endblock %}

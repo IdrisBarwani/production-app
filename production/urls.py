@@ -17,7 +17,7 @@ from django.contrib import admin
 from django.conf.urls import url
 from django.urls import include, path
 from django.conf import settings
-from manufac.views import start, add_wol, get_wol
+from manufac.views import start, add_wol, get_wol, LogUpdateView, recieve_data
 # from django.conf.urls.static import static
 
 admin.site.site_header = 'Production App admin'
@@ -30,5 +30,7 @@ urlpatterns = [
     path('<int:pk>/start/', start, name='start'),
     path('<int:pk>/add_wol/', add_wol, name='add_wol'),
     path('<int:pk>/get_wol/', get_wol, name='get_wol'),
+    path('<int:pk>/logUpdate/', LogUpdateView.as_view(), name='WorkOrderLog'),
+    path('recieve_data/', recieve_data, name='recieve_data')
 ] 
 # + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

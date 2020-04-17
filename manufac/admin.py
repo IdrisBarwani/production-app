@@ -98,10 +98,10 @@ class WorkOrderAdmin(admin.ModelAdmin):
         # WorkOrder.objects.update(status='c')
         # print(WorkOrder.objects.filter(id=obj.pk))
         # white = format_html('<button id="%(id)s" data-value="%(value)s">Completed</button>' % {'id': obj.pk, 'value': obj.status})
-        black = format_html('<a class="button" href="/%(id)s/start">Mark Started</a><a class="button" href="/%(id)s/get_wol">ADD</a>'% {'id': obj.pk})
+        black = format_html('<a class="button" href="/%(id)s/start">Mark Started</a><a class="button" href="/%(id)s/logUpdate">ADD</a>'% {'id': obj.pk})
         # format_html('<a class="button" href="/%(id)s/start">Mark Started</a><a class="button" href="/%(id)s/%(process)s/addwol">ADD</a>'% {'id': obj.pk, 'process': obj.get_process_display()})
         return black
-    action_button.short_description = "Change status"
+    action_button.short_description = "Actions"#"Change status"
 
     def WorkOrder_id(self, obj):
         return obj.id

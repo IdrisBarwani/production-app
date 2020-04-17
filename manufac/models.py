@@ -171,13 +171,15 @@ class WorkOrderLog(models.Model):
     operation = models.CharField(max_length=120, choices=OPERATION_CHOICES)
     quantity = models.PositiveIntegerField()
 
+    def __str__(self):
+        return self.operation
+
     def status(self):
         return self.quantity
 
     @classmethod
-    def create(cls, work_order_fk_id, routing_id_id, operation, quantity):
-        print(routing_id_id)
-        wol = cls(work_order_fk_id=work_order_fk_id, routing_id_id=routing_id_id, operation=operation, quantity=quantity)
+    def create(cls, work_order_fk, routing_id, operation, quantity):
+        wol = cls(work_order_fk=work_order_fk, routing_id=routing_id, operation=operation, quantity=quantity)
         wol.save()
         return wol
 
