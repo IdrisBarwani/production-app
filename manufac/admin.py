@@ -6,7 +6,7 @@ from django.contrib.auth.models import User, Group
 
 # Register your models here.
 
-from .models import WorkOrder, Pack, TechPackSku, ComponentSku, InventoryTransaction, Size, Sort, WorkOrderLog, Routing, RouteAssociation, RoutingGroup
+from .models import WorkOrder, Pack, TechPackSku, ComponentSku, InventoryTransaction, Size, Shirt, Sort, WorkOrderLog, Routing, RouteAssociation, RoutingGroup
 
 class TechPackSkuInline(admin.StackedInline):
     model = TechPackSku
@@ -14,10 +14,24 @@ class TechPackSkuInline(admin.StackedInline):
     verbose_name = 'Fabric'
     verbose_name_plural = 'Fabric'
 
-class SizeInline(admin.StackedInline):
+class SizeInline(admin.StackedInline): #T-shirt
+    verbose_name = 'T-shirt'
+    verbose_name_plural = 'T-shirt'
     model = Size
     # readonly_fields = ('XXL','total')
+    readonly_fields = ['fabric',]
     max_num = 1
+    def fabric(self, obj):
+        return mark_safe("""<a class="button" href="#/tab/inline_0/">Add Fabric</a>""")
+
+class ShirtInline(admin.StackedInline):
+    verbose_name = 'Shirt'
+    verbose_name_plural = 'Shirt'
+    model = Shirt
+    readonly_fields = ['fabric',]
+    max_num = 1
+    def fabric(self, obj):
+        return mark_safe("""<a class="button" href="#/tab/inline_0/">Add Fabric</a>""")
 
 class WorkOrderAdmin(admin.ModelAdmin):
     # print('-------start----------')
@@ -28,7 +42,14 @@ class WorkOrderAdmin(admin.ModelAdmin):
     
     list_display = ['WorkOrder_id','product_sku_id', 'product_image', 'status','priority','process','required_quantity','avg_fabric_consumption','fabric_required','action_button']
 
-    fields = ('product_sku_id','status','priority','start_time','end_time')
+    fields = ('product_sku_id','status','priority','start_time','end_time','product_type','fabric')
+    readonly_fields = ['product_type','fabric']
+    def product_type(self, obj):
+        return mark_safe("""
+        <a class="button" href="#/tab/inline_1/">T-shirt</a>
+        <a class="button" href="#/tab/inline_2/">Shirt</a>""")
+    def fabric(self, obj):
+        return mark_safe("""<a class="button" href="#/tab/inline_0/">Add Fabric</a>""")
 
     # def get_list_display(self, request):
     #     current_user_username = request.user.get_username()
@@ -78,7 +99,7 @@ class WorkOrderAdmin(admin.ModelAdmin):
         
 
     inlines = [
-        TechPackSkuInline, SizeInline
+        TechPackSkuInline, SizeInline, ShirtInline
     ]
 
     def fabric_required(self, obj): #---------------------This block of code can be removed later

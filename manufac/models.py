@@ -118,11 +118,18 @@ class WorkOrder(models.Model):
         return retrieval
 
     def required_quantity(self):
-        retrieval = ""
-        required_quantity = Size.objects.filter(work_order_fk = self.id)
+        retrieval = "0"
+        retrieval2 = "0"
+        required_quantity = Size.objects.filter(work_order_fk = self.id) #t-shirt
+        required_quantity2 = Shirt.objects.filter(work_order_fk = self.id) #shirt
         for e in required_quantity:
             retrieval = e.total
-        return retrieval
+        for e in required_quantity2:
+            retrieval2 = e.total
+        total = (
+            int(retrieval) + int(retrieval2)
+        )
+        return total
 
     def fabric_required(self):
         pack_lines = TechPackSku.objects.filter(work_order_id = self.id)
@@ -236,6 +243,18 @@ class Size(models.Model):
     @property
     def total(self):
         tolal = int(self.XXS) + int(self.XS) + int(self.S) + int(self.M) + int(self.L) + int(self.XL) + int(self.XXL)
+        return tolal
+
+class Shirt(models.Model):
+    work_order_fk = models.ForeignKey('WorkOrder', on_delete=models.CASCADE)
+    S = models.PositiveIntegerField("38", default=0)
+    M = models.PositiveIntegerField("40", default=0)
+    L = models.PositiveIntegerField("42", default=0)
+    XL = models.PositiveIntegerField("44", default=0)
+    XXL = models.PositiveIntegerField("46", default=0)
+    @property
+    def total(self):
+        tolal =  int(self.S) + int(self.M) + int(self.L) + int(self.XL) + int(self.XXL)
         return tolal
     
 class Sort(models.Model):
