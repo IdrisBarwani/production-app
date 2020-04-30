@@ -2,17 +2,27 @@ import re
 from django.contrib import admin
 from django.utils.html import mark_safe,format_html
 from django.contrib.auth.models import User, Group
+from jet.admin import CompactInline
 
 
 # Register your models here.
 
 from .models import WorkOrder, Pack, TechPackSku, ComponentSku, InventoryTransaction, Size, Shirt, Sort, WorkOrderLog, Routing, RouteAssociation, RoutingGroup
 
-class TechPackSkuInline(admin.StackedInline):
+class TechPackSkuInline(CompactInline):
     model = TechPackSku
     extra = 1
     verbose_name = 'Fabric'
     verbose_name_plural = 'Fabric'
+    fieldsets = (
+        (None, {
+            'fields': ('pack_id', 'fabric_sku_id', 'avg_consumption')
+        }),
+        ('Polo', {
+            'classes': ('collapse',),
+            'fields': ('is_polo', 'trim_fabric'),
+        }),
+    )
 
 class SizeInline(admin.StackedInline): #T-shirt
     verbose_name = 'T-shirt'

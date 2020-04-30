@@ -202,10 +202,13 @@ class Pack(models.Model):
         return id_name
  
 class TechPackSku(models.Model):
+    work_order_id = models.ForeignKey('WorkOrder', on_delete=models.CASCADE, null=True, blank=True) #added to get this in inline view
     pack_id = models.ForeignKey('Pack', on_delete=models.CASCADE)
     fabric_sku_id = models.ForeignKey('ComponentSku', on_delete=models.CASCADE)
-    work_order_id = models.ForeignKey('WorkOrder', on_delete=models.CASCADE, null=True, blank=True) #added to get this in inline view
     avg_consumption = models.DecimalField(max_digits=5, decimal_places=2)
+    is_polo = models.BooleanField(default=False)
+    trim_fabric = models.ForeignKey('ComponentSku', on_delete=models.CASCADE, related_name='+')
+
     def __str__(self):
         id_name_consumption = str(self.fabric_sku_id) + ' -> ' + str(self.avg_consumption)
         return id_name_consumption
