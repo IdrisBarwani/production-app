@@ -207,7 +207,7 @@ class TechPackSku(models.Model):
     fabric_sku_id = models.ForeignKey('ComponentSku', on_delete=models.CASCADE)
     avg_consumption = models.DecimalField(max_digits=5, decimal_places=2)
     is_polo = models.BooleanField(default=False)
-    trim_fabric = models.ForeignKey('ComponentSku', on_delete=models.CASCADE, related_name='+')
+    trim_fabric = models.ForeignKey('ComponentSku', on_delete=models.CASCADE, related_name='+', null=True, blank=True)
 
     def __str__(self):
         id_name_consumption = str(self.fabric_sku_id) + ' -> ' + str(self.avg_consumption)
