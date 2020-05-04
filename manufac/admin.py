@@ -20,7 +20,7 @@ class TechPackSkuInline(CompactInline):
         }),
         ('Polo', {
             'classes': ('collapse',),
-            'fields': ('is_polo', 'trim_fabric'),
+            'fields': ('is_trim', 'trim_fabric'),
         }),
     )
 
