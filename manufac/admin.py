@@ -7,7 +7,7 @@ from jet.admin import CompactInline
 
 # Register your models here.
 
-from .models import WorkOrder, Pack, TechPackSku, ComponentSku, InventoryTransaction, Size, Shirt, Sort, WorkOrderLog, Routing, RouteAssociation, RoutingGroup
+from .models import WorkOrder, Pack, TechPackSku, ComponentSku, FabricInventory, InventoryTransaction, Size, Shirt, Sort, WorkOrderLog, Routing, RouteAssociation, RoutingGroup
 
 class TechPackSkuInline(CompactInline):
     model = TechPackSku
@@ -188,7 +188,17 @@ class ComponentSkuAdmin(admin.ModelAdmin):
     list_display = ('id','name')
 
 admin.site.register(ComponentSku, ComponentSkuAdmin)
-admin.site.register(InventoryTransaction)
+
+class FabricInventoryAdmin(admin.ModelAdmin):
+    list_display = ['id','component_sku_id_name','total_inventory','remaining_quantity','in_process_quantity','last_modified_on']
+    def component_sku_id_name(self, obj):
+        return obj.component_sku_id
+    component_sku_id_name.short_description = 'Fabric (Id - Name)'
+admin.site.register(FabricInventory, FabricInventoryAdmin)
+
+class InventoryTransactionAdmin(admin.ModelAdmin):
+    list_display = ['id','component_sku_id','operation_type','quantity']
+admin.site.register(InventoryTransaction, InventoryTransactionAdmin)
 
 class SizeAdmin(admin.ModelAdmin):
     list_display = [field.name for field in Size._meta.get_fields()]

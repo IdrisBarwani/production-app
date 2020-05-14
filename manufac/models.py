@@ -3,6 +3,7 @@ import datetime
 from django.db import models
 from django.utils import timezone
 from django.contrib.auth.models import Group
+from django.utils.html import mark_safe
 
 # Create your models here.
 
@@ -35,11 +36,20 @@ PROCESS_CHOICES = [
     (9, 'Completed'),
 ]
 
+#WorkOrderLog operation choices
 OPERATION_CHOICES = [
     ('i', 'IN'),
     ('o', 'OUT'),
     ('m', 'Missing'),
     ('r', 'Rejected'),
+]
+
+#Fabric Inventory Log operation choices
+INVENTORY_OPERATION_CHOICES = [
+    ('a', 'Add'),
+    ('s', 'Subtract'),
+    ('r', 'Reserved'),
+    ('u', 'Unreserved'),
 ]
 
 class Routing(models.Model):
@@ -227,11 +237,90 @@ class ComponentSku(models.Model):
     #     for i in name:
     #         retval = retval + str(self.id) + ' - ' + str(self.name) + ' '
     #     return retval
+
+class FabricInventory(models.Model):
+    component_sku_id = models.ForeignKey('ComponentSku', on_delete=models.CASCADE)
+    # quantity = models.DecimalField(max_digits=20, decimal_places=8)
+    # recieved_on = models.DateTimeField(auto_now=True, null=True, blank=True)
+    class Meta:
+        verbose_name_plural = 'Fabric inventory'
+
+    def total_inventory(self): #Total inventory available
+        fabric_lines = InventoryTransaction.objects.filter(component_sku_id = self.component_sku_id)
+        retrieval = "0"
+        iteration = "0"
+        for e in fabric_lines:
+            operation = e.operation_type
+            if operation == 'a': 
+                retrieval = (
+                float(iteration) + float(e.quantity)
+                )
+            elif operation == 's': 
+                retrieval = (
+                float(iteration) - float(e.quantity)
+                )
+            
+            iteration = float(retrieval)
+        return iteration
+
+    def remaining_quantity(self): #Remaining quantity
+        fabric_lines = InventoryTransaction.objects.filter(component_sku_id = self.component_sku_id)
+        retrieval = "0"
+        iteration = "0"
+        for e in fabric_lines:
+            operation = e.operation_type
+            if operation == 'a': 
+                retrieval = (
+                float(iteration) + float(e.quantity)
+                )
+            elif operation == 's': 
+                retrieval = (
+                float(iteration) - float(e.quantity)
+                )
+            elif operation == 'r': 
+                retrieval = (
+                float(iteration) - float(e.quantity)
+                )
+            elif operation == 'u': 
+                retrieval = (
+                float(iteration) + float(e.quantity)
+                )
+            iteration = float(retrieval)
+        return iteration
+
+    def in_process_quantity(self): # In Process Quantity
+        fabric_lines = InventoryTransaction.objects.filter(component_sku_id = self.component_sku_id)
+        retrieval = "0"
+        iteration = "0"
+        for e in fabric_lines:
+            operation = e.operation_type
+            if operation == 'r': 
+                retrieval = (
+                float(iteration) + float(e.quantity)
+                )
+            elif operation == 'u': 
+                retrieval = (
+                float(iteration) - float(e.quantity)
+                )
+            iteration = float(retrieval)
+
+        if iteration == 0 :
+            iteration = mark_safe("""<a style="color: indianred;">Nil</a>""")
+
+        return iteration
+
+    def last_modified_on(self): #Total inventory available
+        fabric_lines = InventoryTransaction.objects.filter(component_sku_id = self.component_sku_id)
+        for e in fabric_lines:
+            updated_on = e.last_modified_on
+            updated_on = updated_on
+        return updated_on
  
 class InventoryTransaction(models.Model):
     component_sku_id = models.ForeignKey('ComponentSku', on_delete=models.CASCADE)
-    operation_type = models.CharField(max_length=10) #it'll be ENUM. ADD, SUBTRACT, RESERVED, UNRESERVED
     quantity = models.DecimalField(max_digits=20, decimal_places=8)
+    operation_type = models.CharField(max_length=10, default='a', choices=INVENTORY_OPERATION_CHOICES) #it'll be ENUM. ADD, SUBTRACT, RESERVED, UNRESERVED
+    last_modified_on = models.DateTimeField(auto_now=True)
     #updated_by = models.CharField(max_length=20) #Either User or WorkOrder.
 
 class Size(models.Model):
