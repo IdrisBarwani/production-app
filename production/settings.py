@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/2.2/ref/settings/
 """
 
 import os
+import django_heroku
 
 JET_INDEX_DASHBOARD = 'dashboard.CustomIndexDashboard'
 
@@ -130,3 +131,5 @@ STATIC_URL = '/static/'
 # PROJECT_DIR = os.path.dirname(os.path.abspath(__file__))
 # STATIC_ROOT = os.path.join(PROJECT_DIR, 'static')
 # MEDIA_ROOT = os.path.join(BASE_DIR, '/')
+
+django_heroku.settings(locals())
