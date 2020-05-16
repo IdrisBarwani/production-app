@@ -1,5 +1,4 @@
 Django==2.2.11
-mysqlclient==3.22.0
 django-jet==1.0.8
 gunicorn
 django-heroku
