@@ -1,4 +1,4 @@
-Django==2.2.11
+Django==2.2.24
 django-jet==1.0.8
 Pillow
 gunicorn
